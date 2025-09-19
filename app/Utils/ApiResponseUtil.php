@@ -1,6 +1,6 @@
 <?php
 
-namespace App\utils;
+namespace App\Utils;
 
 use App\Dtos\ApiResponseDto;
 use Illuminate\Http\JsonResponse;
