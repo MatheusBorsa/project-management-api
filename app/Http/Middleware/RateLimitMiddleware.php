@@ -23,7 +23,7 @@ class RateLimitMiddleware
 
         $requests = Cache::get($key, 0);
 
-        if ($request >= $limit) {
+        if ($requests >= $limit) {
             return ApiResponseUtil::error(
                 'Too many requests.',
                 null,
