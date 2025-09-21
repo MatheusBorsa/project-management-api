@@ -55,7 +55,7 @@ class ClientController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         try {
             $client = Client::with(['users' => function ($query) {
@@ -63,10 +63,25 @@ class ClientController extends Controller
                     ->withPivot('role');
             }])->findOrFail($id);
 
+            if (!$client->users->pluck('id')->contains($request->user()->id)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
             return ApiResponseUtil::success(
                 'Client retrieved successfully',
                 $client,
                 200
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Client not found',
+                ['error' => $e->getMessage()],
+                404
             );
 
         } catch (Exception $e) {
@@ -75,7 +90,6 @@ class ClientController extends Controller
                 ['error' => $e->getMessage()],
                 500
             );
-
         }
     }
 
@@ -127,11 +141,25 @@ class ClientController extends Controller
                 200
             );
 
+        } catch (ValidationException $e) {
+            return ApiResponseUtil::error(
+                'Validation error',
+                ['error' => $e->getMessage()],
+                422
+            );
+
         } catch (ModelNotFoundException $e) {
             return ApiResponseUtil::error(
                 'Client not found',
                 ['error' => $e->getMessage()],
                 404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Server error',
+                ['error' => $e->getMessage()],
+                500
             );
         }
     }
@@ -246,6 +274,20 @@ class ClientController extends Controller
                 200
             );
 
+        } catch (ValidationException $e) {
+            return ApiResponseUtil::error(
+                'Validation error',
+                ['error' => $e->getMessage()],
+                422
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Client not found',
+                ['error' => $e->getMessage()],
+                404
+            );
+
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to update user role',
@@ -293,6 +335,12 @@ class ClientController extends Controller
                 200
             );
 
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Client not found',
+                ['error' => $e->getMessage()],
+                404
+            );
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to remove user from client',

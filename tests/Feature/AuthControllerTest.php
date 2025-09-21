@@ -13,15 +13,29 @@ class AuthControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[Test]
-    public function user_can_register_with_valid_password()
+    protected function validUserData(array $overrides = []): array
     {
-        $response = $this->postJson('/api/auth/register', [
+        return array_merge([
             'name' => 'Borsa',
             'email' => 'borsa@example.com',
             'password' => 'StrongPass123!',
             'password_confirmation' => 'StrongPass123!',
-        ]);
+        ], $overrides);
+    }
+
+    protected function createUser(array $overrides = []): User
+    {
+        return User::factory()->create($overrides);
+    }
+
+    protected function actingAsUser(User $user): void
+    {
+        Sanctum::actingAs($user);
+    }
+
+    public function test_user_can_register_with_valid_password(): void
+    {
+        $response = $this->postJson('/api/auth/register', $this->validUserData());
 
         $response->assertStatus(201)
             ->assertJson([
@@ -34,15 +48,12 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    #[Test]
-    public function user_cannot_register_with_weak_password()
+    public function test_user_cannot_register_with_weak_password(): void
     {
-        $response = $this->postJson('/api/auth/register', [
-            'name' => 'Weak User',
-            'email' => 'weak@example.com',
+        $response = $this->postJson('/api/auth/register', $this->validUserData([
             'password' => '123',
             'password_confirmation' => '123',
-        ]);
+        ]));
 
         $response->assertStatus(422)
             ->assertJson([
@@ -51,15 +62,11 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function user_cannot_register_with_mismatched_password_confirmation()
+    public function test_user_cannot_register_with_mismatched_password_confirmation(): void
     {
-        $response = $this->postJson('/api/auth/register', [
-            'name' => 'Mismatch User',
-            'email' => 'mismatch@example.com',
-            'password' => 'StrongPass123!',
-            'password_confirmation' => 'StrongPass321!',
-        ]);
+        $response = $this->postJson('/api/auth/register', $this->validUserData([
+            'password_confirmation' => 'WrongPass123!',
+        ]));
 
         $response->assertStatus(422)
             ->assertJson([
@@ -68,16 +75,15 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function user_can_login_with_correct_credentials()
+    public function test_user_can_login_with_correct_credentials(): void
     {
-        $user = User::factory()->create([
+        $user = $this->createUser([
             'email' => 'borsa@example.com',
             'password' => Hash::make('StrongPass123!'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'borsa@example.com',
+            'email' => $user->email,
             'password' => 'StrongPass123!',
         ]);
 
@@ -88,16 +94,15 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function user_cannot_login_with_invalid_credentials()
+    public function test_user_cannot_login_with_invalid_credentials(): void
     {
-        $user = User::factory()->create([
+        $user = $this->createUser([
             'email' => 'borsa@example.com',
             'password' => Hash::make('StrongPass123!'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email' => 'borsa@example.com',
+            'email' => $user->email,
             'password' => 'WrongPassword!',
         ]);
 
@@ -108,12 +113,10 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function authenticated_user_can_logout()
+    public function test_authenticated_user_can_logout(): void
     {
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
+        $user = $this->createUser();
+        $this->actingAsUser($user);
 
         $response = $this->postJson('/api/auth/logout');
 
@@ -124,12 +127,10 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function authenticated_user_can_retrieve_own_data()
+    public function test_authenticated_user_can_retrieve_own_data(): void
     {
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
+        $user = $this->createUser();
+        $this->actingAsUser($user);
 
         $response = $this->getJson('/api/auth/me');
 
@@ -146,8 +147,7 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    #[Test]
-    public function unauthenticated_user_cannot_retrieve_user_data()
+    public function test_unauthenticated_user_cannot_retrieve_user_data(): void
     {
         $response = $this->getJson('/api/auth/me');
 
