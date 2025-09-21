@@ -223,7 +223,7 @@ class TaskControllerTest extends TestCase
 
         $response = $this->actingAs($this->owner)
             ->patchJson("/api/tasks/{$task->id}/status", [
-                'status' => TaskStatus::COMPLETED->value,
+                'status' => TaskStatus::IN_PROGRESS->value,
             ]);
 
         $response->assertStatus(200)
@@ -234,7 +234,7 @@ class TaskControllerTest extends TestCase
 
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
-            'status' => TaskStatus::COMPLETED->value,
+            'status' => TaskStatus::IN_PROGRESS->value,
         ]);
     }
 
