@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->timestamp('due_date')->nullable();
             $table->string('status')->default('todo');
+            $table->string('image_path')->nullable();
             $table->timestamps();
         });
     }

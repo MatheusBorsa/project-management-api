@@ -51,8 +51,13 @@ class TaskController extends Controller
                 'description' => 'nullable|string',
                 'deadline' => 'nullable|date',
                 'status' => 'required|string|in:' . implode(',', array_column(TaskStatus::cases(), 'value')),
-                'assigned_to' => 'nullable|integer|exists:users,id'
+                'assigned_to' => 'nullable|integer|exists:users,id',
+                'image_path' => 'nullable|image|max:2048'
             ]);
+
+            if($request->hasFile('image_path')) {
+                $validated['image_path'] = $request->file('image_path')->store('tasks', 'public');
+            }
 
             $task = $client->tasks()->create($validated);
 
@@ -91,8 +96,13 @@ class TaskController extends Controller
                 'description' => 'sometimes|nullable|string',
                 'deadline' => 'sometimes|date',
                 'status' => 'sometimes|in:' . implode(',', array_column(TaskStatus::cases(), 'value')),
-                'assigned_to' => 'sometimes|nullable|exists:users,id'
+                'assigned_to' => 'sometimes|nullable|exists:users,id',
+                'image_path' => 'nullable|image|max:2048'
             ]);
+
+            if ($request->hasFile('image_path')) {
+                $validated['image_path'] = $request->file('image_path')->store('tasks', 'public');
+            }
 
             $task->update($validated);
 
