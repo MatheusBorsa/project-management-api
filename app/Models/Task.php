@@ -31,4 +31,9 @@ class Task extends Model
     {
         return $this->hasMany(TaskHistory::class);
     }
+
+    public function arts()
+    {
+        return $this->hasMany(Art::class);
+    }
 }
