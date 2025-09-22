@@ -4,6 +4,6 @@ namespace App\Enums;
 
 enum UserRole: string
 {
-    case USER = 'free';
+    case FREE = 'free';
     case PREMIUM = 'premium';
 }
