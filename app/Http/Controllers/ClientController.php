@@ -10,9 +10,12 @@ use App\Utils\ApiResponseUtil;
 use App\Enums\ClientUserRole;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ClientController extends Controller
 {
+
+    use AuthorizesRequests;
     public function store(Request $request)
     {
         try {
@@ -199,18 +202,12 @@ class ClientController extends Controller
     {
         try {
             $client = Client::with('users')->findOrFail($id);
-            $isMember = $client->users()->where('users.id', $request->user()->id)->exists();
-            if (!$isMember) {
-                return ApiResponseUtil::error(
-                    'Unauthorized',
-                    null,
-                    403
-                );
-            }
+
+            $data = $this->authorize('viewCollaborators', $client);
 
             return ApiResponseUtil::success(
                 'Retrieved collaborators successfully',
-                ['users' => $client->users]
+                $data
             );
 
         } catch (Exception $e) {

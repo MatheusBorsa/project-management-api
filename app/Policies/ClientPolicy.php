@@ -12,6 +12,30 @@ class ClientPolicy
 
     use HandlesAuthorization;
 
+    public function viewCollaborators(User $user, Client $client)
+    {
+        $users = $client->relationLoaded('users') ? $client->users : $client->users()->get();
+
+        if (!$users->contains('id', $user->id)) {
+            throw new \Illuminate\Auth\Access\AuthorizationException('You are not a collaborator of this project.');
+        }
+
+        $owner = $users->firstWhere('pivot.role', 'owner');
+        $plan = $owner?->role ?? 'free';
+
+        $maxCollaborators = match ($plan) {
+            'free' => 3,
+            'premium' => 10,
+            default => 3
+        };
+
+        return [
+            'users' => $users,
+            'collaborators_count' => $users->count(),
+            'max_collaborators' => $maxCollaborators
+        ];
+    }
+    
     public function inviteCollaborator(User $user, Client $client): bool
     {
         $users = $client->relationLoaded('users') ? $client->users : $client->users()->get();
