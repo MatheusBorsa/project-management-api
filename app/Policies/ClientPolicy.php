@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Client;
 use App\Models\User;
 use App\Enums\UserRole;
+use App\Enums\ClientUserRole;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClientPolicy
@@ -36,7 +37,7 @@ class ClientPolicy
         ];
     }
     
-    public function inviteCollaborator(User $user, Client $client): bool
+    public function inviteCollaborator(User $user, Client $client, string $role): bool
     {
         $users = $client->relationLoaded('users') ? $client->users : $client->users()->get();
 
@@ -48,6 +49,11 @@ class ClientPolicy
         if (!$owner) return false;
 
         if ($owner->role === UserRole::FREE && $users->count() >= 3) {
+            return false;
+        }
+
+        if ($role === ClientUserRole::CLIENT->value && $owner->role !== UserRole::PREMIUM)
+        {
             return false;
         }
 

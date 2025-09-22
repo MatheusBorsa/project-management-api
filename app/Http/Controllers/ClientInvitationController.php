@@ -29,7 +29,15 @@ class ClientInvitationController extends Controller
     {
         $client = Client::with('users')->findOrFail($clientId);
 
-        $this->authorize('inviteCollaborator', $client);
+        $user = $request->user();
+
+        if (!\Gate::forUser($user)->allows('inviteCollaborator', [$client, $request->role])) {
+            return ApiResponseUtil::error(
+                'You are not authorized',
+                null,
+                403
+            );
+        }
 
         $request->validate([
             'email' => 'required|email',
