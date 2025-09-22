@@ -203,7 +203,8 @@ class ClientController extends Controller
         try {
             $client = Client::with('users')->findOrFail($id);
 
-            $data = $this->authorize('viewCollaborators', $client);
+            $data = app(\App\Policies\ClientPolicy::class)
+            ->viewCollaborators($request->user(), $client);
 
             return ApiResponseUtil::success(
                 'Retrieved collaborators successfully',
