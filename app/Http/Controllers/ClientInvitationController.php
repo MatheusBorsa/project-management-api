@@ -13,9 +13,11 @@ use App\Mail\ClientInvitation as ClientInvitationMail;
 use App\Enums\ClientUserRole;
 use App\Utils\ApiResponseUtil;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ClientInvitationController extends Controller
 {   
+    use AuthorizesRequests;
     private function isClientOwner(Client $client, User $user): bool
     {
         return $client->users()
@@ -25,6 +27,10 @@ class ClientInvitationController extends Controller
     }
     public function store(Request $request, $clientId)
     {
+        $client = Client::with('users')->findOrFail($clientId);
+
+        $this->authorize('inviteCollaborator', $client);
+
         $request->validate([
             'email' => 'required|email',
             'role' => 'required|string|in:' . implode(',', array_column(ClientUserRole::cases(), 'value'))
