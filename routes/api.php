@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::get('calendar/week', [TaskController::class, 'weeklyCalendar']);
 
         Route::post('/{task}/arts', [ArtController::class, 'store']);
+        Route::delete('/arts/{id}', [ArtController::class, 'destroy']);
     });
 
     Route::prefix('invitations')->group(function () {

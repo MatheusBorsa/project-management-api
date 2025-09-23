@@ -9,9 +9,25 @@ use App\Enums\ArtStatus;
 use App\Models\Art;
 use App\Models\Task;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ArtController extends Controller
 {
+    private function checkTaskPermission($taskOrClient, $user, array $allowedRoles = ['owner', 'participant'])
+    {
+        if ($taskOrClient instanceof Client) {
+            $client = $taskOrClient;
+        } else {
+            $client = $taskOrClient->client;
+        }
+        
+        $pivot = $client->users->firstWhere('id', $user->id)?->pivot;
+
+        if (!$pivot || !in_array($pivot->role, $allowedRoles)) {
+            return false;
+        }
+        return true;
+    }
     public function store(Request $request, Task $task)
     {
         try {
@@ -48,6 +64,44 @@ class ArtController extends Controller
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Server error',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+            $art = Art::with('task.client.users')->findOrFail($id);
+
+            if(!$this->checkTaskPermission($art->task, $user)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $art->delete();
+
+            return ApiResponseUtil::success(
+                'Art removed successfully',
+                null,
+                200
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Art not found',
+                ['error' => $e->getMessage()],
+                404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to remove art',
                 ['error' => $e->getMessage()],
                 500
             );
