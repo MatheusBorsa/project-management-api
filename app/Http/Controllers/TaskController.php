@@ -173,7 +173,7 @@ class TaskController extends Controller
         try {
             $user = $request->user();
 
-            $task = Task::with('client.users', 'assignedUser')->findOrFail($id);
+            $task = Task::with('client.users', 'assignedUser', 'arts')->findOrFail($id);
 
             $pivot = $task->client->users->firstWhere('id', $user->id)?->pivot;
             if (!$pivot) {
