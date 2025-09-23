@@ -42,6 +42,14 @@ class ClientController extends Controller
                 'status' => 'required|string|in:active,inactive'
             ]);
 
+            if (!Client::isValidPhone($validatedData['phone'])) {
+                return ApiResponseUtil::error(
+                    'Validation error',
+                    ['phone' => ['Invalid phone number format']],
+                    422
+                );
+            }
+
             $client = Client::create($validatedData);
 
             $request->user()->clients()->attach($client->id, [
@@ -161,7 +169,6 @@ class ClientController extends Controller
                 );
             }
 
-
             $validatedData = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'contact_name' => 'sometimes|nullable|string|max:255',
@@ -188,6 +195,14 @@ class ClientController extends Controller
                 'tiktok_url' => 'sometimes|nullable|url|max:255',
                 'status' => 'sometimes|required|string|in:active,inactive'
             ]);
+
+            if (!Client::isValidPhone($validatedData['phone'])) {
+                return ApiResponseUtil::error(
+                    'Validation error',
+                    ['phone' => ['Invalid phone number format']],
+                    422
+                );
+            }
 
             $client->update($validatedData);
 
