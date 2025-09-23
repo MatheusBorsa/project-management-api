@@ -14,8 +14,7 @@ class Task extends Model
         'description',
         'deadline',
         'status',
-        'assigned_to',
-        'image_path'
+        'assigned_to'
     ];
 
     public function client()
