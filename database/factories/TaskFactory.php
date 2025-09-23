@@ -22,8 +22,7 @@ class TaskFactory extends Factory
             'description'  => $this->faker->paragraph(3, true),
             'deadline'     => $this->faker->dateTimeBetween('now', '+1 month'),
             'status'       => $this->faker->randomElement(['pending', 'in_progress', 'completed', 'on_hold']),
-            'assigned_to'  => User::factory(),
-            'image_path'   => $this->faker->imageUrl(640, 480, 'business'),
+            'assigned_to'  => User::factory()
         ];
     }
 }

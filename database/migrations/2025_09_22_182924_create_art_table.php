@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('art_path');
             $table->string('status')->default(ArtStatus::PENDING->value);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

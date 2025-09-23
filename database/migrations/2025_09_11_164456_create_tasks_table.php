@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('client_id');
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamp('due_date')->nullable();
             $table->string('status')->default(TaskStatus::PENDING->value);
             $table->timestamps();

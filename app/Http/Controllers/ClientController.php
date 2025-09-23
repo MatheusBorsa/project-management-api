@@ -11,6 +11,8 @@ use App\Enums\ClientUserRole;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Rules\Cnpj;
+use Illuminate\Validation\Rule;
 
 class ClientController extends Controller
 {
@@ -22,9 +24,22 @@ class ClientController extends Controller
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'contact_name' => 'nullable|string|max:255',
-                'email' => 'required|email|max:255|unique:clients',
+                'email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('clients')
+                ],
                 'phone' => 'required|string|max:30',
-                'notes' => 'required|string'
+                'notes' => 'required|string',
+                'cnpj' => ['required', 'unique:clients,cnpj', new Cnpj],
+                'bussiness_address' => 'nullable|string|max:255',
+                'website_url' => 'nullable|url|max:255',
+                'instagram_url' => 'nullable|url|max:255',
+                'linkedin_url' => 'nullable|url|max:255',
+                'twitter_url' => 'nullable|url|max:255',
+                'tiktok_url' => 'nullable|url|max:255',
+                'status' => 'required|string|in:active,inactive'
             ]);
 
             $client = Client::create($validatedData);
@@ -126,14 +141,52 @@ class ClientController extends Controller
         try {
             $user = $request->user();
 
-            $client = $user->clients()->findOrFail($id);
+            $client = Client::with('users')->findOrFail($id);
+
+            $pivot = $client->users->firstWhere('id', $user->id)?->pivot;
+
+            if (!$pivot || !in_array($pivot->role, [ClientUserRole::OWNER->value, ClientUserRole::PARTICIPANT->value])) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            if ($user->id === $user->id) {
+                return ApiResponseUtil::error(
+                    'Owner cannot remove themselves',
+                    null,
+                    403
+                );
+            }
+
 
             $validatedData = $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'contact_name' => 'sometimes|nullable|string|max:255',
-                'email' => 'sometimes|required|email|max:255|unique:clients',
+                'email' => [
+                    'sometimes',
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('clients')->ignore($client->id),
+                ],
                 'phone' => 'sometimes|required|string|max:30',
-                'notes' => 'sometimes|required|string'
+                'notes' => 'sometimes|required|string',
+                'cnpj' => [
+                    'sometimes',
+                    'required',
+                    Rule::unique('clients')->ignore($client->id),
+                    new Cnpj
+                ],
+                'bussiness_address' => 'sometimes|nullable|string|max:255',
+                'website_url' => 'sometimes|nullable|url|max:255',
+                'instagram_url' => 'sometimes|nullable|url|max:255',
+                'linkedin_url' => 'sometimes|nullable|url|max:255',
+                'twitter_url' => 'sometimes|nullable|url|max:255',
+                'tiktok_url' => 'sometimes|nullable|url|max:255',
+                'status' => 'sometimes|required|string|in:active,inactive'
             ]);
 
             $client->update($validatedData);
@@ -147,7 +200,7 @@ class ClientController extends Controller
         } catch (ValidationException $e) {
             return ApiResponseUtil::error(
                 'Validation error',
-                ['error' => $e->getMessage()],
+                ['error' => $e->errors()],
                 422
             );
 

@@ -8,6 +8,7 @@ use App\Utils\ApiResponseUtil;
 use App\Enums\ArtStatus;
 use App\Models\Art;
 use App\Models\Task;
+use App\Models\Client;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -28,36 +29,47 @@ class ArtController extends Controller
         }
         return true;
     }
+
     public function store(Request $request, Task $task)
     {
         try {
+            $task->load('client.users');
+            
+            if (!$this->checkTaskPermission($task, $request->user())) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
             $validatedData = $request->validate([
                 'title' => 'required|string|max:255',
                 'file' => 'required|file|mimes:jpg,jpeg,png,svg,gif|max:10240'
             ]);
 
-        $artPath = null;
-        if ($request->hasFile('file')) {
-            $artPath = $request->file('file')->store('arts', 'public');
-        }
+            $artPath = null;
+            if ($request->hasFile('file')) {
+                $artPath = $request->file('file')->store('art', 'public');
+            }
 
-        $art = Art::create([
-            'task_id' => $task->id,
-            'title' => $validatedData['title'],
-            'art_path' => $artPath,
-            'status' => ArtStatus::PENDING,
-        ]);
+            $art = Art::create([
+                'task_id' => $task->id,
+                'title' => $validatedData['title'],
+                'art_path' => $artPath,
+                'status' => ArtStatus::PENDING,
+            ]);
 
-        return ApiResponseUtil::success(
-            'Art created successfully',
-            ['art' => $art],
-            201
-        );
+            return ApiResponseUtil::success(
+                'Art created successfully',
+                ['art' => $art],
+                201
+            );
 
         } catch (ValidationException $e) {
             return ApiResponseUtil::error(
                 'Validation error',
-                ['error' => $e->getMessage()],
+                ['errors' => $e->errors()],
                 422
             );
 

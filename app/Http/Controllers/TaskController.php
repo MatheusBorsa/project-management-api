@@ -51,8 +51,7 @@ class TaskController extends Controller
                 'description' => 'nullable|string',
                 'deadline' => 'nullable|date',
                 'status' => 'required|string|in:' . implode(',', array_column(TaskStatus::cases(), 'value')),
-                'assigned_to' => 'nullable|integer|exists:users,id',
-                'image_path' => 'nullable|image|max:2048'
+                'assigned_to' => 'nullable|integer|exists:users,id'
             ]);
 
             if($request->hasFile('image_path')) {
@@ -96,8 +95,7 @@ class TaskController extends Controller
                 'description' => 'sometimes|nullable|string',
                 'deadline' => 'sometimes|date',
                 'status' => 'sometimes|in:' . implode(',', array_column(TaskStatus::cases(), 'value')),
-                'assigned_to' => 'sometimes|nullable|exists:users,id',
-                'image_path' => 'nullable|image|max:2048'
+                'assigned_to' => 'sometimes|nullable|exists:users,id'
             ]);
 
             if ($request->hasFile('image_path')) {
@@ -188,6 +186,13 @@ class TaskController extends Controller
                 'Task retrieved successfully',
                 new TaskResource($task),
                 200
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Task not found',
+                ['error' => $e->getMessage()],
+                404
             );
 
         } catch (Exception $e) {
