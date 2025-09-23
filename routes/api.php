@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckPremium;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientInvitationController;
@@ -48,9 +49,6 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::patch('{id}/status', [TaskController::class, 'updateStatus']);  
                          
         Route::get('calendar/week', [TaskController::class, 'weeklyCalendar']);
-
-        Route::post('/{task}/arts', [ArtController::class, 'store']);
-        Route::delete('/arts/{id}', [ArtController::class, 'destroy']);
     });
 
     Route::prefix('invitations')->group(function () {
@@ -58,6 +56,13 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::delete('{invitationId}', [ClientInvitationController::class, 'destroy']);     
         
         Route::post('{token}/accept', [ClientInvitationController::class, 'accept']); 
+    });
+});
+
+Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
+    Route::prefix('tasks')->group(function () {
+        Route::post('/{task}/arts', [ArtController::class, 'store']);
+        Route::delete('/arts/{id}', [ArtController::class, 'destroy']);
     });
 });
 
