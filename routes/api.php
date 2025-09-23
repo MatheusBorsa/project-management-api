@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientInvitationController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ArtController;
 
 //Auth
 Route::prefix('auth')->group(function () {
@@ -47,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::patch('{id}/status', [TaskController::class, 'updateStatus']);  
                          
         Route::get('calendar/week', [TaskController::class, 'weeklyCalendar']);
+
+        Route::post('/{task}/arts', [ArtController::class, 'store']);
     });
 
     Route::prefix('invitations')->group(function () {

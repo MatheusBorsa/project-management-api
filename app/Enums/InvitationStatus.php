@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum InvitationStatus
+enum InvitationStatus: string
 {
     case PENDING = 'pending';
     case ACCEPTED = 'accepted';
