@@ -14,7 +14,15 @@ class Client extends Model
         'contact_name',
         'email',
         'phone',
-        'notes'
+        'notes',
+        'cnpj',
+        'bussiness_address',
+        'website_url',
+        'instagram_url',
+        'linkedin_url',
+        'twitter_url',
+        'tiktok_url',
+        'status'
     ];
     
     public function users()
