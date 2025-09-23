@@ -11,7 +11,7 @@ class CheckPremium
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user;
+        $user = $request->user();
 
         if (!$user || !$user->isPremium()) {
             return ApiResponseUtil::error(

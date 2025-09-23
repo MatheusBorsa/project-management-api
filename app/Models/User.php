@@ -58,6 +58,11 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function isClientOf($clientId): bool
+    {
+        return $this->clients()->where('client_id', $clientId)->exists();
+    }
+
     public function assignedTasks()
     {
         return $this->hasMany(Task::class, 'assigned_to');
@@ -66,5 +71,15 @@ class User extends Authenticatable
     public function taskHistories()
     {
         return $this->hasMany(TaskHistory::class, 'changed_by');
+    }
+
+    public function isPremium()
+    {
+        return $this->role === UserRole::PREMIUM;
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
     }
 }

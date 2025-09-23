@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
     Route::prefix('tasks')->group(function () {
         Route::post('/{task}/arts', [ArtController::class, 'store']);
         Route::delete('/arts/{id}', [ArtController::class, 'destroy']);
+        Route::post('/arts/{artId}/review', [ArtController::class, 'review']);
     });
 });
 

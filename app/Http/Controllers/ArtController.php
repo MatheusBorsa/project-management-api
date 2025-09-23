@@ -6,11 +6,14 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Utils\ApiResponseUtil;
 use App\Enums\ArtStatus;
+use App\Enums\ClientUserRole;
 use App\Models\Art;
+use App\Models\ArtFeedback;
 use App\Models\Task;
 use App\Models\Client;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\Rule;
 
 class ArtController extends Controller
 {
@@ -57,7 +60,7 @@ class ArtController extends Controller
                 'task_id' => $task->id,
                 'title' => $validatedData['title'],
                 'art_path' => $artPath,
-                'status' => ArtStatus::PENDING,
+                'status' => ArtStatus::PENDING->value,
             ]);
 
             return ApiResponseUtil::success(
@@ -114,6 +117,78 @@ class ArtController extends Controller
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to remove art',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function review(Request $request, $artId)
+    {
+        try {
+            $validatedData = $request->validate([
+                'status' => ['required', Rule::in(array_column(ArtStatus::cases(), 'value'))],
+                'feedback' => 'nullable|string|max:1000'
+            ]);
+
+            $art = Art::with('task')->findOrFail($artId);
+            $user = $request->user();
+            
+            if (!$this->checkTaskPermission($art->task, $user, [ClientUserRole::CLIENT->value])) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $art->status = ArtStatus::from($validatedData['status'])->value;
+            $art->save();
+
+            if(!empty($validatedData['feedback'])) {
+                ArtFeedback::create([
+                    'art_id' => $art->id,
+                    'user_id' => $user->id,
+                    'feedback' => $validatedData['feedback']
+                ]);
+            }
+
+            if ($art->status === ArtStatus::APPROVED->value) {
+                $art_path = basename($art->art_path);
+                $newPath = "clients/{$user->id}/approved_arts/{$art_path}";
+                \Storage::disk('public')->move($art->art_path, $newPath);
+                $art->art_path = $newPath;
+                $art->save();
+            }
+
+            return ApiResponseUtil::success(
+                'Art reviewed successfully',
+                [
+                    'id' => $art->id,
+                    'title' => $art->title,
+                    'status' => $art->status,
+                    'art_path' => $art->art_path,
+                    'feedback' => $validatedData['feedback']
+                ]
+            );
+
+        } catch (ValidationException $e) {
+            return ApiResponseUtil::error(
+                'Validation error',
+                $e->errors(),
+                422
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Art not found',
+                null,
+                404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Server error',
                 ['error' => $e->getMessage()],
                 500
             );
