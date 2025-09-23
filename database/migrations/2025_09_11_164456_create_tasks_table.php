@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\TaskStatus;
 
 return new class extends Migration
 {
@@ -17,8 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->timestamp('due_date')->nullable();
-            $table->string('status')->default('todo');
-            $table->string('image_path')->nullable();
+            $table->string('status')->default(TaskStatus::PENDING->value);
             $table->timestamps();
         });
     }

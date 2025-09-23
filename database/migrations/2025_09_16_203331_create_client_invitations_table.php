@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\InvitationStatus;
 
 return new class extends Migration
 {
@@ -18,7 +19,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('role');
             $table->string('token')->unique();
-            $table->enum('status', ['pending', 'accepted', 'declined', 'expired'])->default('pending');
+            $table->string('status')->default(value: InvitationStatus::PENDING->value);
             $table->timestamp('expires_at');
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
