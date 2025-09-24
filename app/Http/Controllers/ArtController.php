@@ -85,6 +85,78 @@ class ArtController extends Controller
         }
     }
 
+    public function update(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+            $art = Art::with('task.client.users')->findOrFail($id);
+
+            if (!$this->checkTaskPermission($art->task, $user)) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            if ($art->status === ArtStatus::APPROVED->value) {
+                return ApiResponseUtil::error(
+                    'Approved arts cannot be updated',
+                    null,
+                    403
+                );
+            }
+
+            $validatedData = $request->validate([
+                'title' => 'sometimes|required|string|max:255',
+                'file' => 'sometimes|required|file|mimes:jpg,jpeg,png,svg,gif|max:10240'
+            ]);
+
+            if ($request->hasFile('file')) {
+                if ($art->art_path && \Storage::disk('public')->exists($art->art_path)) {
+                    \Storage::disk('public')->delete($art->art_path);
+                }
+
+                $newPath = $request->file('file')->store('art', 'public');
+                $art->art_path = $newPath;
+            }
+
+            if (isset($validatedData['title'])) {
+                $art->title = $validatedData['title'];  
+            }
+
+            $art->save();
+            $art->refresh();
+
+            return ApiResponseUtil::success(
+                'Art update successfully',
+                ['art' => $art],
+                200
+            );
+
+        } catch (ValidationException $e) {
+            return ApiResponseUtil::error(
+                'Validation error',
+                ['errors' => $e->errors()],
+                422
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Art not found',
+                null,
+                404
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to update art',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
     public function destroy(Request $request, $id)
     {
         try {
