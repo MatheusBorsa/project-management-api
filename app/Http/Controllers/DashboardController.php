@@ -12,7 +12,7 @@ use App\Enums\TaskStatus;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function premiumDashboard(Request $request)
     {
         try {
             $user = $request->user();
@@ -88,6 +88,43 @@ class DashboardController extends Controller
         } catch (Exception $e) {
             return ApiResponseUtil::error(
                 'Failed to retrieve dashboard data',
+                ['error' => $e->getMessage()],
+                500
+            );
+        }
+    }
+
+    public function index(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $taskSummary = [
+                'total' => Task::where('assigned_to', $user->id)->count(),
+                'pending' => Task::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+                'in_progress' => Task::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+                'completed' => Task::where('assigned_to', $user->id)->where('status', 'completed')->count(),
+            ];
+
+            $artsSummary = [
+                'total' => Art::whereHas('task', fn($q) => $q->where('assigned_to', $user->id))->count(),
+                'pending' => Art::whereHas('task', fn($q) => $q->where('assigned_to', $user->id))
+                                ->where('status', 'pending')->count(),
+                'approved' => Art::whereHas('task', fn($q) => $q->where('assigned_to', $user->id))
+                                ->where('status', 'approved')->count(),
+            ];
+
+            return ApiResponseUtil::success(
+                'Dashboard data',
+                [
+                    'tasks' => $taskSummary,
+                    'arts' => $artsSummary,
+                ]
+            );
+
+        } catch (Exception $e) {
+            return ApiResponseUtil::error(
+                'Failed to load dashboard',
                 ['error' => $e->getMessage()],
                 500
             );

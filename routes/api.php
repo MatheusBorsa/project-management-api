@@ -21,7 +21,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function() {
-    Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
+        Route::get('/dashboard/premium', [DashboardController::class, 'premiumDashboard']);
+    });
 
     Route::prefix('clients')->group(function () {
         Route::get('/', [ClientController::class, 'index']);           
