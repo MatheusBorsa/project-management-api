@@ -21,14 +21,11 @@ class ClientPolicy
             throw new \Illuminate\Auth\Access\AuthorizationException('You are not a collaborator of this project.');
         }
 
-        $owner = $users->firstWhere('pivot.role', 'owner');
-        $plan = $owner?->role ?? 'free';
+        $owner = $users->firstWhere('pivot.role', ClientUserRole::OWNER->value);
 
-        $maxCollaborators = match ($plan) {
-            'free' => 3,
-            'premium' => 10,
-            default => 3
-        };
+        $isPremium = $owner ? $owner->isPremium() : false;
+
+        $maxCollaborators = $isPremium ? 10 : 3;
 
         return [
             'users' => $users,
@@ -45,18 +42,19 @@ class ClientPolicy
             return false;
         }
 
-        $owner = $users->firstWhere('pivot.role', 'owner');
+        $owner = $users->firstWhere('pivot.role', ClientUserRole::OWNER->value);
         if (!$owner) return false;
 
-        if ($owner->role === UserRole::FREE && $users->count() >= 3) {
+        $isPremium = $owner->isPremium();
+
+        if (!$isPremium && $users->count() >= 3) {
             return false;
         }
 
-        if ($role === ClientUserRole::CLIENT->value && $owner->role !== UserRole::PREMIUM)
-        {
+        if ($role === ClientUserRole::CLIENT->value && !$isPremium) {
             return false;
         }
-
+        
         return true;
     }
 
