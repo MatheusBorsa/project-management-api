@@ -9,11 +9,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Enums\UserRole;
+use App\Traits\PhoneTrait;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes, PhoneTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +24,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        'role'
+        'phone',
+        'password'
     ];
 
     /**
@@ -73,13 +74,28 @@ class User extends Authenticatable
         return $this->hasMany(TaskHistory::class, 'changed_by');
     }
 
-    public function isPremium()
-    {
-        return $this->role === UserRole::PREMIUM;
-    }
-
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
+    }
+
+        public function subscription()
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
+    public function subscribed()
+    {
+        return $this->subscription && $this->subscription->active();
+    }
+
+    public function onTrial()
+    {
+        return $this->subscription && $this->subscription->onTrial();
+    }
+
+    public function isPremium(): bool
+    {
+        return $this->subscribed() || $this->onTrial();
     }
 }

@@ -26,9 +26,18 @@ class AuthController extends Controller
                 ],
             ]);
 
+            if (!User::isValidPhone($validatedData['phone'])) {
+                return ApiResponseUtil::error(
+                    'Validation error',
+                    ['phone' => ['Invalid phone number format']],
+                    422
+                );
+            }
+
             $user = User::create([
                 'name' => $validatedData['name'],
                 'email' => $validatedData['email'],
+                'phone' => $validatedData['phone'],
                 'password' => $validatedData['password']
             ]);
 

@@ -8,6 +8,8 @@ use App\Http\Controllers\ClientInvitationController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ArtController;
+use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\Api\BillingController;
 
 //Auth
 Route::prefix('auth')->group(function () {
@@ -20,11 +22,12 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
+    ->withoutMiddleware('web');
+
 Route::middleware('auth:sanctum')->group(function() {
     Route::get('/dashboard', [DashboardController::class, 'index']);
-    Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
-        Route::get('/dashboard/premium', [DashboardController::class, 'premiumDashboard']);
-    });
+    Route::middleware(CheckPremium::class)->get('/dashboard/premium', [DashboardController::class, 'premiumDashboard']);
 
     Route::prefix('clients')->group(function () {
         Route::get('/', [ClientController::class, 'index']);           
@@ -60,9 +63,16 @@ Route::middleware('auth:sanctum')->group(function() {
         
         Route::post('{token}/accept', [ClientInvitationController::class, 'accept']); 
     });
+
+    Route::prefix('billing')->group(function () {
+        Route::post('/checkout', [BillingController::class, 'createCheckoutSession']);
+        Route::get('/portal', [BillingController::class, 'billingPortal']);
+        Route::get('/status', [BillingController::class, 'subscriptionStatus']);
+        Route::post('/cancel', [BillingController::class, 'cancelSubscription']);
+    });
 });
 
-Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
+Route::middleware([CheckPremium::class])->group(function () {
     Route::prefix('tasks')->group(function () {
         Route::post('/{task}/arts', [ArtController::class, 'store']);
         Route::patch('/{task}/arts', [ArtController::class, 'update']);
