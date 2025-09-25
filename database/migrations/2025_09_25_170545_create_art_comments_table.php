@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->timestamp('deadline')->nullable()->after('description');
+        Schema::create('art_comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('art_id');
+            $table->foreignId('user_id');
+            $table->integer('x');
+            $table->integer('y');
+            $table->text('comment');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('art_comments');
     }
 };
