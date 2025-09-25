@@ -266,4 +266,78 @@ class ArtController extends Controller
             );
         }
     }
+
+    public function addComment(Request $request, $artId)
+    {
+        try {
+            $validatedData = $request->validate([
+                'x' => 'required|integer|min:0',
+                'y' =>'required|integer|min:0',
+                'comment' => 'required|string|max:1000'
+            ]);
+
+            $art = Art::findOrFail($artId);
+            $user = $request->user();
+
+            if (!$this->checkTaskPermission($art->task, $user, [ClientUserRole::CLIENT->value])) {
+                return ApiResponseUtil::error(
+                    'You are not authorized',
+                    null,
+                    403
+                );
+            }
+
+            $comment = $art->comments()->create([
+                'user_id' => $user->id,
+                'x' => $validatedData['x'],
+                'y' => $validatedData['y'],
+                'comment' => $validatedData['comment']
+            ]);
+
+            $art->status = ArtStatus::REVISION_REQUESTED->value;
+            $art->save();
+
+            return ApiResponseUtil::success(
+
+                'Comment added successfully',
+                ['comment' => $comment],
+                201
+            );
+
+        } catch (ValidationException $e) {
+            return ApiResponseUtil::error(
+                'Validation error',
+                ['errors' => $e->errors()],
+                422
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Failed to add comment',
+                ['error' => $e->getMessage()],
+                500
+            );  
+        }
+    }
+
+    public function getComments($artId)
+    {
+        try {
+            $art = Art::findOrFail($artId);
+
+            $comments = $art->comments()->with('user')->get();
+
+            return ApiResponseUtil::success(
+                'Comments retrieved successfully',
+                ['comments' => $comments]
+            );
+
+        } catch (ModelNotFoundException $e) {
+            return ApiResponseUtil::error(
+                'Art not found',
+                ['error' => $e->getMessage()],
+                404
+            );
+        }
+    }
 }

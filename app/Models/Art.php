@@ -24,4 +24,9 @@ class Art extends Model
     {
         return $this->hasMany(ArtFeedback::class);
     }
+
+    public function comments()
+    {
+        return $this->hasMany(ArtComment::class);
+    }
 }

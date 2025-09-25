@@ -68,6 +68,8 @@ Route::middleware(['auth:sanctum', CheckPremium::class])->group(function () {
         Route::patch('/{task}/arts', [ArtController::class, 'update']);
         Route::delete('/arts/{id}', [ArtController::class, 'destroy']);
         Route::post('/arts/{artId}/review', [ArtController::class, 'review']);
+        Route::post('/arts/{artId}/comments', [ArtController::class, 'addComment']);
+        Route::get('/arts/{artId}/comments', [ArtController::class, 'getComments']);
     });
 });
 
