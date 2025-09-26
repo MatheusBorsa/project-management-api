@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ArtFeedback extends BaseModel
 {
+    use SoftDeletes;
     protected $fillable = [
         'art_id',
         'user_id',

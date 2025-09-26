@@ -23,6 +23,7 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->timestamp('accepted_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             
             $table->unique(['client_id', 'email']);
             $table->index(['token', 'status']);

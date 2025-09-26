@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('tiktok_url')->nullable();
             $table->string('status')->default(ClientStatus::ACTIVE->value);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

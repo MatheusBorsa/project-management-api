@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('deadline')->nullable();
             $table->string('status')->default(TaskStatus::PENDING->value);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
