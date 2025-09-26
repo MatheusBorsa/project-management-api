@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class ClientInvitation extends Model
+class ClientInvitation extends BaseModel
 {
     protected $fillable = [
         'client_id',
@@ -18,6 +18,11 @@ class ClientInvitation extends Model
         'expires_at',
         'accepted_at'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return [];
+    }
 
     protected $casts = [
         'expires_at' => 'datetime',

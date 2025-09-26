@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Subscription extends Model
+class Subscription extends BaseModel
 {
     protected $fillable = [
         'user_id',
@@ -19,6 +19,11 @@ class Subscription extends Model
         'trial_ends_at' => 'datetime',
         'ends_at' => 'datetime'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return [];
+    }
 
     public function user()
     {

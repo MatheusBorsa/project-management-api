@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\PhoneTrait;
-class Client extends Model
+class Client extends BaseModel
 {
     use HasFactory, SoftDeletes, PhoneTrait;
 
@@ -25,6 +25,11 @@ class Client extends Model
         'tiktok_url',
         'status'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return ['users', 'tasks', 'invitations'];
+    }
     
     public function users()
     {

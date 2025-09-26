@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ArtComment extends Model
+class ArtComment extends BaseModel
 {
     protected $fillable = [
         'art_id',
@@ -13,6 +13,11 @@ class ArtComment extends Model
         'y',
         'comment'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return [];
+    }
 
     public function art()
     {

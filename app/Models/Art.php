@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Art extends Model
+class Art extends BaseModel
 {
     use SoftDeletes;
     protected $fillable = [
@@ -14,6 +14,11 @@ class Art extends Model
         'art_path',
         'status'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return ['comments', 'feedbacks'];
+    }
 
     public function task()
     {

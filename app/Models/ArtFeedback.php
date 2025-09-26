@@ -4,13 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ArtFeedback extends Model
+class ArtFeedback extends BaseModel
 {
     protected $fillable = [
         'art_id',
         'user_id',
         'feedback'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return [];
+    }
 
     public function art()
     {

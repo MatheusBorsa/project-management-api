@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Enums\UserRole;
 use App\Traits\PhoneTrait;
 
-class User extends Authenticatable
+class User extends BaseModel
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, SoftDeletes, PhoneTrait;
@@ -27,6 +27,11 @@ class User extends Authenticatable
         'phone',
         'password'
     ];
+
+    protected function getCascadeRelations()
+    {
+        return ['tasks', 'comments', 'feedbacks', 'clients', 'subscriptions'];
+    }
 
     /**
      * The attributes that should be hidden for serialization.

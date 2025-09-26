@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Task extends Model
+class Task extends BaseModel
 {   
     use HasFactory;
     protected $fillable = [
@@ -16,6 +16,11 @@ class Task extends Model
         'status',
         'assigned_to'
     ];
+
+    public function getCascadeRelations()
+    {
+        return ['comments', 'feedbacks', 'arts'];
+    }
 
     public function client()
     {
