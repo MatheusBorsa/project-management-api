@@ -1,6 +1,6 @@
-# API de Gerenciamento de Projetos para Designers
+# Project Management API for Designers
 
-## Tecnologias Utilizadas
+## Technologies Used
 
 - PHP
 - Laravel
@@ -8,82 +8,82 @@
 - Git
 - PostgreSQL
 
-## Funcionalidades da API
+## API Features
 
-API RESTful para gerenciamento de clientes, tarefas e fluxos de trabalho, com autenticação, controle de acesso por plano e integração com pagamentos.
+RESTful API for managing clients, tasks, and workflows, with authentication, plan-based access control, and payment integration.
 
-### Autenticação e Usuário
-- Registro e login de usuários
-- Autenticação via Laravel Sanctum
-- Logout de usuários autenticados
-- Recuperação de dados do usuário autenticado
+### Authentication and User
+- User registration and login
+- Authentication via Laravel Sanctum
+- Logout for authenticated users
+- Retrieval of authenticated user data
 
 ### Dashboard
-- Dashboard geral com dados do usuário
-- Dashboard premium com funcionalidades exclusivas (controle por middleware)
+- General dashboard with user data
+- Premium dashboard with exclusive features (controlled via middleware)
 
-### Gerenciamento de Clientes
-- CRUD completo de clientes
-- Gerenciamento de usuários vinculados a clientes
-- Atualização e remoção de usuários de um cliente
-- Listagem de tarefas associadas a clientes
+### Client Management
+- Complete CRUD for clients
+- Management of users linked to clients
+- Update and removal of users from a client
+- Listing of tasks associated with clients
 
-### Convites
-- Envio de convites para usuários participarem de clientes
-- Reenvio e cancelamento de convites
-- Aceite e recusa de convites via token
-- Consulta pública de convites por token
+### Invitations
+- Sending invitations for users to participate in clients
+- Resending and canceling invitations
+- Accepting and declining invitations via token
+- Public query of invitations by token
 
-### Tarefas
-- CRUD completo de tarefas
-- Associação de tarefas a clientes
-- Atualização de status de tarefas
-- Visualização de tarefas em calendário semanal
-- Acesso individual a tarefas
+### Tasks
+- Complete CRUD for tasks
+- Association of tasks with clients
+- Task status updates
+- Viewing tasks in weekly calendar
+- Individual access to tasks
 
-### Artes e Revisões (Premium)
-- Upload, atualização e remoção de artes vinculadas a tarefas
-- Sistema de revisão de artes
-- Comentários em artes
-- Listagem de comentários por arte
-- Acesso restrito a usuários com plano premium
+### Artwork and Revisions (Premium)
+- Upload, update, and removal of artwork linked to tasks
+- Artwork review system
+- Comments on artwork
+- Listing comments by artwork
+- Restricted access to users with premium plan
 
-### Billing e Assinaturas
-- Integração com Stripe
-- Criação de sessão de checkout
-- Acesso ao portal de billing
-- Consulta de status da assinatura
-- Cancelamento de assinatura
-- Processamento de webhooks do Stripe
+### Billing and Subscriptions
+- Stripe integration
+- Checkout session creation
+- Access to billing portal
+- Subscription status query
+- Subscription cancellation
+- Stripe webhook processing
 
-### Segurança e Controle de Acesso
-- Autenticação baseada em token
-- Middleware para controle de acesso premium
-- Separação de rotas públicas e protegidas
-- Processamento seguro de webhooks
+### Security and Access Control
+- Token-based authentication
+- Middleware for premium access control
+- Separation of public and protected routes
+- Secure webhook processing
 
-## Instalação e Execução
+## Installation and Execution
 
-### 1 - Clonar o repositório
+### 1 - Clone the repository
 ```bash
-git clone https://github.com/MatheusBorsa/api-gerenciamento-projetos.git
-cd api-gerenciamento-projetos
+git clone https://github.com/MatheusBorsa/project-management-api.git
+cd project-management-api
 ```
 
-### 2 - Instalar dependências
+### 2 - Install Dependencies
 ```bash
 composer install
 ```
 
-### 3 - Configurar o ambiente
+### 3 - Configure the environment
 
-Copie o arquivo de exemplo:
+Copy the example file:
 
 ```bash
 cp .env.example .env
 ```
 
-Configure as variáveis de banco de dados:
+Configure the database variables:
 ```bash
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
@@ -92,29 +92,28 @@ DB_DATABASE=pgsql
 DB_USERNAME=pgsql
 DB_PASSWORD=pgsql
 ```
-### 4 - Gere a chave da aplicação
+### 4 - Generate the application key
 ```bash
 php artisan key:generate
 ```
 
-### 5 - Inicie o docker
+### 5 - Start docker
 ```bash
 docker-compose up -d
 ```
 
-### 6 - Execute as migrações e inicie o projeto
+### 6 - Run the migrations and start the project
 ```bash
 php artisan migrate
 php artisan serve
 ```
 
-## Testes
+## Tests
 ```bash
 php artisan test
 ```
-## Objetivo do projeto
+## Project Objective
 
-O objetivo deste projeto é desenvolver uma aplicação focada no workflow de trabalho de designers e profissionais da indústria criativa, permitindo a criação de artes, o envio para revisão, o processo de aprovação ou solicitação de alterações por parte dos clientes, e o acompanhamento de todo o ciclo de trabalho.
+The objective of this project is to develop an application focused on the workflow of designers and creative industry professionals, allowing the creation of artwork, sending for review, the approval process or change requests from clients, and tracking of the entire work cycle.
 
-Toda a arquitetura e as funcionalidades do sistema foram pensadas para refletir esse fluxo, garantindo organização, rastreabilidade das revisões e clareza na comunicação entre criadores e clientes.
-
+All the architecture and system functionalities were designed to reflect this flow, ensuring organization, traceability of revisions, and clarity in communication between creators and clients.
